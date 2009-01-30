@@ -1,4 +1,4 @@
-<?php
+<?php /* #?ini charset="utf-8"?
 /*
 
 [TemplateFunctionSettings]
@@ -15,7 +15,7 @@ ForceRegenerationValue=true
 # two options are possible here :
 # - ESI
 # - SSI
-BlockHandler=SSI
+BlockHandler=ESI
 
 # This is useful when ESI blocks
 # and HTTPD are not on the same server.
@@ -29,7 +29,8 @@ BlockHandler=SSI
 # If you plan to use a local storage then this directive
 # MUST be empty : BlockFilePathPrependString=
 # BlockFilePathPrependString=http://siblocks.mysite.com/
-BlockFilePathPrependString=http://plop.com/path/to/esi/
+# Trailing slash is mandatory
+BlockFilePathPrependString=http://www.example.com/path/to/esi/
 
 [SIFilesSettings]
 # two options are possible here :
@@ -41,17 +42,19 @@ FileHandler=FS
 # the FTP file handler
 # only usefull if you set [SIFilesSettings]/FileHandler=FTP
 [FTPSettings]
-Host=customers.executus
+Host=ftp.example.com
 Port=21
-Login=root
+Login=user
 Password=publish
-Timeout=10
-DestinationFolder=path/to/esi/
+Timeout=2
+# Trailing slash is mandatory here
+DestinationFolder=path/to/si-blocks/folder/
 
 [DevelopmentSettings]
 # When set to disable the
 # extension will not insert
 # the SI tags in the HTML page
+# Useful for devellopment
 ActivateSIMarkup=enabled
 
 [CronjobSettings]
@@ -59,7 +62,7 @@ DeleteSIBlockOnFailure=enabled
 
 [HostSettings]
 HostMatchMapItems[]
-HostMatchMapItems[]=localhost:8080;plain_site
+HostMatchMapItems[]=www.example.com;plain_site
 
 */
 ?>

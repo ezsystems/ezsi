@@ -29,11 +29,24 @@
 {/si-block}
 
 <h3>test 7 : simple call to {ldelim}si-block{rdelim}, one key, ttl = zero </h3>
-{si-block key='keytest7' ttl='2m'}
+{si-block key='keytest7' ttl='2s'}
     test 7 : block content
 {/si-block}
 
 <h3>test 8 : simple call to {ldelim}si-block{rdelim}, non scalar key, one ttl </h3>
-{si-block key='keytest8' ttl='9.5h'}
+{si-block key='keytest8' ttl='2s'}
     test 8 : block content
 {/si-block}
+
+<h3>test 9 : key as a variable</h3>
+{def $block_key_part_1='mykey'}
+{def $block_key_part_2='foo'}
+{def $final_block_key=concat( $block_key_part_1, $block_key_part_2 )}
+
+{si-block key=$final_block_key ttl='200s'}
+    test 9 : block content
+{/si-block}
+
+{undef $block_key_part_1}
+{undef $block_key_part_2}
+{undef $final_block_key}

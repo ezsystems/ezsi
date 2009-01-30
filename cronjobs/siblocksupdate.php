@@ -28,10 +28,10 @@
 // ## END COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 //
 
-include_once( 'lib/ezdb/classes/ezdb.php' );
+// include_once( 'lib/ezdb/classes/ezdb.php' );
 include_once( 'extension/ezsi/classes/ezsiblockfunction.php' );
-include_once( 'kernel/classes/ezcontentcachemanager.php' );
-include_once( 'kernel/classes/ezcontentobjecttreenode.php' );
+// include_once( 'kernel/classes/ezcontentcachemanager.php' );
+// include_once( 'kernel/classes/ezcontentobjecttreenode.php' );
 
 $ini                     = eZINI::instance( 'site.ini' );
 $avalaibleSiteAccessList = $ini->variable( 'SiteAccessSettings', 'AvailableSiteAccessList' );
@@ -71,59 +71,57 @@ foreach( $rows as $expiredBlock )
             $urlAlias = $expiredBlock['urlalias'];
 
             // index page
-            if( strlen( $urlAlias ) == 1 )
+            if( strlen( $urlAlias ) == 0 )
             {
-                // missing trailing slash
-                if( substr( $indexPage, -1, 1 ) != '/' )
+                if( $indexPage[0] == '/' )
                 {
-                    $indexPage = $indexPage . '/';
+                    $indexPage = substr( $indexPage, 1 );
                 }
 
                 $urlAlias = $indexPage;
             }
 
-            $destinationURLArray = explode( '/', substr( $urlAlias, 0, -1 ) );
-            $nodeID = array_slice( $destinationURLArray, -1, 1 );
-            $nodeID = $nodeID[0];
+            $destinationURLArray = explode( '/', $urlAlias );
 
-            // 0 => false
-            // 1 => true or top level node
-            // I do not want that
-            if( is_numeric( $nodeID ) && $nodeID > 1 )
+            // do we need to clear ViewCache ?
+            // content/view/<viewmode>/<nodeID>
+            if( isset( $destinationURLArray[3] ) )
             {
-                $node     = eZContentObjectTreeNode::fetch( $nodeID );
-                $object   = $node->object();
-                $objectID = $object->attribute( 'id' );
+                $nodeID = $destinationURLArray[3];
 
-                // clearing view cache for this node
-                eZContentCacheManager::clearContentCache( $objectID );
-                eZDebug::writeNotice( 'Clearing ViewCache for object ' . $objectID, 'eZSIBlockFunction::process' );
+                // 0 => false
+                // 1 => true or top level node
+                // you do not want that
+                if( is_numeric( $nodeID ) && $nodeID > 1 )
+                {
+                    eZContentCache::cleanup( array( $nodeID ) );
+                    eZDebug::writeNotice( 'Clearing ViewCache for object ' . $nodeID, 'eZSIBlockFunction::process' );
+                }
             }
         }
 
-        $cli->output( 'Calling ' . $pageURL . ' : ', false );
+        $cli->output( 'Calling ' . $cli->stylize( 'emphasize', $pageURL ) . ' : ', false );
 
         // regenerating si blocks by calling the page
         // storing the results is useless
         if(  !@file_get_contents( $pageURL, FILE_BINARY ) )
         {
-            $cli->output( 'FAILED' );
+            $cli->output( $cli->stylize( 'red', 'FAILED' ) );
             removeFileIfNeeded( $expiredBlock, $db);
-            //eZDebug::writeError( 'Update of SI blocks for page ' . $pageURL . ' failed', 'SI Block Update Cronjob' );
         }
         else
         {
             $sql  = "SELECT mtime FROM ezsi_files WHERE namehash = '" . $expiredBlock['namehash'] . "'";
             $rows = $db->arrayQuery( $sql );
+
             if( $rows[0]['mtime'] > $expiredBlock['mtime'] )
             {
-                $cli->output( 'SUCCESS' );
+                $cli->output( $cli->stylize( 'green', 'SUCCESS' ) );
             }
             else
             {
-                $cli->output( 'CHECKING IF REMOVAL IS NEEDED' );
+                $cli->output( $cli->stylize( 'emphasize', 'CHECKING IF REMOVAL IS NEEDED' ) );
                 removeFileIfNeeded( $expiredBlock, $db);
-                //eZDebug::writeError( 'Update of SI blocks for page ' . $pageURL . ' failed', 'SI Block Update Cronjob' );
             }
         }
     }
@@ -135,7 +133,7 @@ foreach( $rows as $expiredBlock )
 
 function removeFileIfNeeded( $expiredBlock, $db )
 {
-    $ini                    = & eZINI::instance( 'ezsi.ini' );
+    $ini                    = eZINI::instance( 'ezsi.ini' );
     $deleteSIBlockOnFailure = $ini->variable( 'CronjobSettings', 'DeleteSIBlockOnFailure' );
 
     $fileHandler = eZSIBlockFunction::loadSIFileHandler();
@@ -143,6 +141,7 @@ function removeFileIfNeeded( $expiredBlock, $db )
     if( $deleteSIBlockOnFailure == 'enabled' )
     {
         $sql = "DELETE FROM ezsi_files WHERE namehash = '" . $expiredBlock['namehash'] . "'";
+
         if( $db->query( $sql ) )
         {
             $pathInfo = pathinfo( $expiredBlock['filepath'] );

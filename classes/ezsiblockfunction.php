@@ -30,7 +30,7 @@
 
 class eZSiBlockFunction
 {
-    function eZSiBlockFunction( $functionName = 'si-block' )
+    public function eZSiBlockFunction( $functionName = 'si-block' )
     {
         $this->FunctionName = $functionName;
 
@@ -41,21 +41,21 @@ class eZSiBlockFunction
         $this->SIFileHandler  = eZSIBlockFunction::loadSIFileHandler();
     }
 
-    function functionList()
+    public function functionList()
     {
         return array( $this->FunctionName );
     }
 
-    function functionTemplateHints()
+    public function functionTemplateHints()
     {
-        return array( $this->FunctionName => array( 'parameters' => true,
-                                                    'static' => false,
-                                                    'transform-children' => true,
-                                                    'tree-transformation' => false,
+        return array( $this->FunctionName => array( 'parameters'           => true,
+                                                    'static'               => false,
+                                                    'transform-children'   => true,
+                                                    'tree-transformation'  => false,
                                                     'transform-parameters' => true ) );
     }
 
-    function process( $tpl, &$textElements, $functionName, $functionChildren, $functionParameters, $functionPlacement, $rootNamespace, $currentNamespace )
+    public function process( $tpl, &$textElements, $functionName, $functionChildren, $functionParameters, $functionPlacement, $rootNamespace, $currentNamespace )
     {
         switch ( $functionName )
         {
@@ -85,9 +85,19 @@ class eZSiBlockFunction
 
                 $blockFilePathPreprendString = $ini->variable( 'SIBlockSettings', 'BlockFilePathPrependString' );
 
-                if( $this->keyIsValid( $functionParameters, $functionPlacement ) and $this->ttlIsValid( $functionParameters, $functionPlacement ) )
+                if( $this->keyIsValid( $tpl,
+                                       $rootNamespace,
+                                       $currentNamespace,
+                                       $functionParameters,
+                                       $functionPlacement )
+                    and
+                    $this->ttlIsValid( $tpl,
+                                       $rootNamespace,
+                                       $currentNamespace,
+                                       $functionParameters,
+                                       $functionPlacement ) )
                 {
-                    $blockKeyString = $this->generateBlockKeyString( $functionParameters, $functionPlacement );
+                    $blockKeyString = $this->generateBlockKeyString( $tpl, $rootNamespace, $currentNamespace, $functionParameters, $functionPlacement );
 
                     eZDebug::writeNotice( $blockKeyString, 'eZSIBlockFunction::process' );
 
@@ -119,7 +129,8 @@ class eZSiBlockFunction
                         eZDebug::writeNotice( 'file exists : ' . $blockKeyString, 'eZSIBlockFunction::process' );
 
                         // does the ttl needs to be updated ?
-                        if( !$this->updateTTLIfNeeded( $fileInfo[0]['ttl'], md5( $filePath ), $functionParameters ) )
+                        $blockTTL = $tpl->elementValue( $functionParameters['ttl'], $rootNamespace, $currentNamespace, $functionPlacement );
+                        if( !$this->updateTTLIfNeeded( $fileInfo[0]['ttl'], md5( $filePath ), $blockTTL ) )
                         {
                             eZDebug::writeError( 'si-blocks : unable to update the TTL for file : ' . $filePath );
                         }
@@ -167,6 +178,7 @@ class eZSiBlockFunction
                         else
                         {
                             eZDebug::writeNotice( 'file valid : ' . $blockKeyString, 'eZSIBlockFunction::process' );
+
                             if( $SIMarkupIsEnabled )
                             {
                                 $textElements[] = $this->SIBlockHandler->generateMarkup();
@@ -221,27 +233,41 @@ class eZSiBlockFunction
         }
     }
 
-    function generateBlockKeyString( $functionParameters, $functionPlacement )
+    private function generateBlockKeyString( $tpl, $rootNamespace, $currentNamespace, $functionParameters, $functionPlacement )
     {
         $viewParametersString = $this->generateViewParametersString( '', '_' );
 
-        // generating key string
-        $blockKeyString  = $functionParameters['key'][0][1] . '_' ;
-        $blockKeyString .= $functionPlacement[0][0] . '_';
-        $blockKeyString .= $functionPlacement[0][1] . '_';
-        $blockKeyString .= $functionPlacement[1][0] . '_';
-        $blockKeyString .= $functionPlacement[1][1] . '_';
-        $blockKeyString .= $functionPlacement[2] . '_';
-        $blockKeyString .= $viewParametersString;
+        $blockKeyArray[] = $tpl->elementValue( $functionParameters['key'], $rootNamespace, $currentNamespace, $functionPlacement );
+
+        $blockKeyArray[] = $functionPlacement[0][0];
+
+        // this code is buggy since when the TTL is changed
+        // the value of the column is changed so the key
+        // will lead to unnecessary update
+        // $blockKeyArray[] = $functionPlacement[0][1];
+
+        $blockKeyArray[] = $functionPlacement[1][0];
+
+        // same bug as above
+        //$blockKeyArray[] = $functionPlacement[1][1];
+
+        // template's filepath
+        $blockKeyArray[] = $functionPlacement[2];
+
+        // view_parameters
+        $blockKeyArray[] = $viewParametersString;
 
         // fetching the current siteaccess
         $accessName = $GLOBALS['eZCurrentAccess']['name'];
 
-        $blockKeyString .= '_' . $accessName;
+        $blockKeyArray[] = $accessName;
+
+        $blockKeyString = join( '_', $blockKeyArray );
+
         return $blockKeyString;
     }
 
-    function processChildren( $tpl, $functionChildren, $rootNamespace, $currentNamespace )
+    public function processChildren( $tpl, $functionChildren, $rootNamespace, $currentNamespace )
     {
         // generating HTML
         $childTextElements = array();
@@ -256,19 +282,14 @@ class eZSiBlockFunction
         return $text;
     }
 
-    function hasChildren()
+    public function hasChildren()
     {
         return true;
     }
 
-    function keyIsValid( $functionParameters, $functionPlacement )
+    private function keyIsValid( $tpl, $rootNamespace, $currentNamespace, $functionParameters, $functionPlacement )
     {
-        $keyString = '';
-
-        if( isset( $functionParameters['key'][0][1] ) )
-        {
-            $keyString = $functionParameters['key'][0][1];
-        }
+        $keyString = $tpl->elementValue( $functionParameters['key'], $rootNamespace, $currentNamespace, $functionPlacement );
 
         $this->SIBlockHandler->setKey( $keyString );
 
@@ -283,14 +304,9 @@ class eZSiBlockFunction
         return true;
     }
 
-    function ttlIsValid( $functionParameters, $functionPlacement )
+    private function ttlIsValid( $tpl, $rootNamespace, $currentNamespace, $functionParameters, $functionPlacement )
     {
-        $ttlString = '';
-
-        if( isset( $functionParameters['ttl'][0][1] ) )
-        {
-            $ttlString = $functionParameters['ttl'][0][1];
-        }
+        $ttlString = $tpl->elementValue( $functionParameters['ttl'], $rootNamespace, $currentNamespace, $functionPlacement );
 
         $this->SIBlockHandler->setTTL( $ttlString );
 
@@ -304,7 +320,7 @@ class eZSiBlockFunction
         return true;
     }
 
-    function generateUniqueFilename( $SIBlockKey )
+    private function generateUniqueFilename( $SIBlockKey )
     {
         $uniqueFilename = md5( $SIBlockKey  );
 
@@ -313,11 +329,11 @@ class eZSiBlockFunction
         return $uniqueFilename.'.htm';
     }
 
-    function fileExists( $filePath )
+    private function fileExists( $filePath )
     {
-        $db = eZDB::instance();
-        $sql = 'SELECT ttl, mtime FROM ezsi_files WHERE namehash = "' . md5( $filePath ) . '"';
-        $rows  = $db->arrayQuery( $sql );
+        $db   = eZDB::instance();
+        $sql  = 'SELECT ttl, mtime FROM ezsi_files WHERE namehash = "' . md5( $filePath ) . '"';
+        $rows = $db->arrayQuery( $sql );
 
         if( count( $rows ) == 1 )
         {
@@ -327,44 +343,44 @@ class eZSiBlockFunction
         return false;
     }
 
-    function writeRow( $filePath, $TTLInSeconds, $blockKeyString )
+    private function writeRow( $filePath, $TTLInSeconds, $blockKeyString )
     {
-        $viewParametersString = $this->generateViewParametersString( '(', ')/' );
+        $viewParametersString = $this->generateViewParametersString( '/(', ')/' );
 
         $eZURI = eZURI::instance( eZSys::requestURI() );
-        $urlAlias = $eZURI->URIString() . '/' . $viewParametersString;
+        $urlAlias = $eZURI->URIString() . $viewParametersString;
 
         // fetching the current siteaccess
         $accessName = $GLOBALS['eZCurrentAccess']['name'];
 
         $db = eZDB::instance();
         $sql = 'INSERT INTO ezsi_files ( filepath, namehash, mtime, urlalias, siteaccess, ttl, blockkeys )
-                VALUES( "' . $db->escapeString( trim( $filePath ) )       . '", "'
+                VALUES( "' . $db->escapeString( trim( $filePath ) )        . '", "'
                            . $db->escapeString( md5( trim( $filePath ) ) ) . '", "'
-                           . time() . '","'
-                           . $db->escapeString( trim( $urlAlias ) ) . '", "'
-                           . $db->escapeString( trim( $accessName ) ) . '", "'
-                           . $db->escapeString( trim( $TTLInSeconds ) ) . '", "'
-                           . $db->escapeString( trim( $blockKeyString ) ) . '" )';
+                           . time()                                        . '", "'
+                           . $db->escapeString( trim( $urlAlias ) )        . '", "'
+                           . $db->escapeString( trim( $accessName ) )      . '", "'
+                           . $db->escapeString( trim( $TTLInSeconds ) )    . '", "'
+                           . $db->escapeString( trim( $blockKeyString ) )  . '" )';
 
-        // eZDebug::writeNotice( $sql, 'Creating rows' );
+        eZDebug::writeNotice( $sql, 'Creating rows' );
 
         return $db->query( $sql );
     }
 
-    function updateRow( $filePath, $TTLInSeconds )
+    private function updateRow( $filePath, $TTLInSeconds )
     {
         $db = eZDB::instance();
         $sql = 'UPDATE ezsi_files SET mtime = ' . time() . ', ttl = ' . $TTLInSeconds . '
                 WHERE namehash = "'. $db->escapeString( md5( $filePath ) ).'"';
 
-        // eZDebug::writeNotice( $sql, 'Updating rows' );
+        eZDebug::writeNotice( $sql, 'Updating rows' );
 
         return $db->query( $sql );
 
     }
 
-    function cacheBaseSubdir()
+    public function cacheBaseSubdir()
     {
         return 'si-blocks';
     }
@@ -374,6 +390,7 @@ class eZSiBlockFunction
         // taking view parameters and generate a string with them
         $eZURI = eZURI::instance( eZSys::requestURI() );
         $viewParametersString = '';
+
         foreach( $eZURI->UserArray as $paramName => $paramValue )
         {
             $viewParametersString .= $preSeparator . $paramName . $postSeparator . $paramValue;
@@ -386,7 +403,11 @@ class eZSiBlockFunction
     {
         $ini                    = eZINI::instance( 'ezsi.ini' );
         $SIBlockHandlerName     = strtolower( $ini->variable( 'SIBlockSettings', 'BlockHandler' ) );
-        $SIBlockHandlerFilePath = 'extension/ezsi/classes/blockhandlers/' . $SIBlockHandlerName . '/ezsi' . $SIBlockHandlerName . 'blockhandler.php';
+        $SIBlockHandlerFilePath = 'extension/ezsi/classes/blockhandlers/'
+                                  . $SIBlockHandlerName
+                                  . '/ezsi'
+                                  . $SIBlockHandlerName
+                                  . 'blockhandler.php';
 
         if( file_exists( $SIBlockHandlerFilePath ) )
         {
@@ -407,7 +428,11 @@ class eZSiBlockFunction
     {
         $ini                   = eZINI::instance( 'ezsi.ini' );
         $SIFileHandlerName     = strtolower( $ini->variable( 'SIFilesSettings', 'FileHandler' ) );
-        $SIFileHandlerFilePath = 'extension/ezsi/classes/filehandlers/' . $SIFileHandlerName . '/ezsi' . $SIFileHandlerName . 'filehandler.php';
+        $SIFileHandlerFilePath = 'extension/ezsi/classes/filehandlers/'
+                                 . $SIFileHandlerName
+                                 . '/ezsi'
+                                 . $SIFileHandlerName
+                                 . 'filehandler.php';
 
         if( file_exists( $SIFileHandlerFilePath ) )
         {
@@ -424,7 +449,7 @@ class eZSiBlockFunction
         return false;
     }
 
-    function updateTTLIfNeeded( $storedTTL, $nameHash, $functionParameters )
+    private function updateTTLIfNeeded( $storedTTL, $nameHash, $blockTTL )
     {
         $ttlInfo = $this->SIBlockHandler->TTLInSeconds();
 
@@ -442,14 +467,7 @@ class eZSiBlockFunction
             // as well if necessary
             if( $db->query( $sql ) )
             {
-                $ttlString = '';
-
-                if( isset( $functionParameters['ttl'][0][1] ) )
-                {
-                    $ttlString = $functionParameters['ttl'][0][1];
-                }
-
-                $this->SIBlockHandler->setTTL( $ttlString );
+                $this->SIBlockHandler->setTTL( $blockTTL );
 
                 return true;
             }
@@ -460,15 +478,14 @@ class eZSiBlockFunction
         return true;
     }
 
-    /// \privatesection
-    /// Name of the function
-    var $FunctionName;
+    // Name of the function
+    private $FunctionName;
 
     // Name of the SI block handler : ESI or SSI
-    var $SIBlockHandler;
+    private $SIBlockHandler;
 
     // Name of the file handler : FS or FTP so far
-    var $SIFileHandler;
+    private $SIFileHandler;
 }
 
 ?>

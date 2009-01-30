@@ -10,7 +10,7 @@ class eZSIFTPFileHandler extends eZSIFileHandler
     {
         if( is_resource( $this->ConnectionResource ) )
         {
-            eZDebug::writeError( 'No Connexion Resource available', 'eZSIFTPFileHandler::connect' )
+            eZDebug::writeError( 'No Connexion Resource available', 'eZSIFTPFileHandler::connect' );
             return false;
         }
 
@@ -83,7 +83,7 @@ class eZSIFTPFileHandler extends eZSIFileHandler
             }
         }
 
-        // returning to root folder : lots of moves but more clean
+        // returning to root folder : lots of moves but cleaner
         ftp_chdir( $this->ConnectionResource, "/" );
 
         return true;
@@ -151,7 +151,7 @@ class eZSIFTPFileHandler extends eZSIFileHandler
         return @ftp_close( $this->ConnectionResource );
     }
 
-    var $ConnectionResource = false;
+    private $ConnectionResource = false;
 }
 
 function eZSIFTPCloseConnexion()

@@ -18,14 +18,7 @@ abstract class eZSIBlockHandler
 
     public function validateKey()
     {
-        // a key is mandatory
-        if( strlen( $this->Key ) == 0 )
-        {
-            return false;
-        }
-
-        // checking allowed types : string, numeric, booleans
-        if( !is_scalar( $this->Key) )
+        if( !$this->Key )
         {
             return false;
         }
@@ -59,7 +52,8 @@ abstract class eZSIBlockHandler
         $ttlUnit  = substr( $this->TTL, -1);
         $ttlValue = (int)$this->TTL;
 
-        return array( 'ttl_unit' => $ttlUnit, 'ttl_value' => $ttlValue );
+        return array( 'ttl_unit'  => $ttlUnit,
+                      'ttl_value' => $ttlValue );
     }
 
     public function validateTTL()
