@@ -43,10 +43,21 @@
 {def $block_key_part_2='foo'}
 {def $final_block_key=concat( $block_key_part_1, $block_key_part_2 )}
 
-{si-block key=$final_block_key ttl='200s'}
+{si-block key=$final_block_key ttl='2s'}
     test 9 : block content
 {/si-block}
 
 {undef $block_key_part_1}
 {undef $block_key_part_2}
 {undef $final_block_key}
+
+<h3>test 10 : key as an array</h3>
+{si-block key=array( 1, 23, 'rrt' ) ttl='2s'}
+    test 10 : block content
+{/si-block}
+
+<h3>test 11: key as a hash</h3>
+{si-block key=hash( 'foo', 'bar' ) ttl='2s'}
+    test 11 : block content
+{/si-block}
+

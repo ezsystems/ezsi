@@ -237,7 +237,14 @@ class eZSiBlockFunction
     {
         $viewParametersString = $this->generateViewParametersString( '', '_' );
 
-        $blockKeyArray[] = $tpl->elementValue( $functionParameters['key'], $rootNamespace, $currentNamespace, $functionPlacement );
+        $elementValue = $tpl->elementValue( $functionParameters['key'], $rootNamespace, $currentNamespace, $functionPlacement );
+
+        if( is_array( $elementValue ) )
+        {
+            $elementValue = join( '_', $elementValue );
+        }
+
+        $blockKeyArray[] = $elementValue;
 
         $blockKeyArray[] = $functionPlacement[0][0];
 

@@ -2,7 +2,7 @@
 [CronjobSettings]
 ExtensionDirectories[]=ezsi
 
-[CronjobPart-siblocksupdate]
-Scripts[]=siblocksupdate.php
+[CronjobPart-siblockupdate]
+Scripts[]=siblockupdate.php
 */
 ?>
