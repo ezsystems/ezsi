@@ -28,10 +28,7 @@
 // ## END COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 //
 
-// include_once( 'lib/ezdb/classes/ezdb.php' );
 include_once( 'extension/ezsi/classes/ezsiblockfunction.php' );
-// include_once( 'kernel/classes/ezcontentcachemanager.php' );
-// include_once( 'kernel/classes/ezcontentobjecttreenode.php' );
 
 $ini                     = eZINI::instance( 'site.ini' );
 $avalaibleSiteAccessList = $ini->variable( 'SiteAccessSettings', 'AvailableSiteAccessList' );
@@ -57,6 +54,8 @@ $db   = eZDB::instance();
 $sql  = 'SELECT * FROM ezsi_files WHERE (' . time() . ' - mtime) >= ttl ORDER BY TTL DESC';
 $rows = $db->arrayQuery( $sql );
 
+$updatedPageList = array();
+
 foreach( $rows as $expiredBlock )
 {
     if( in_array( $expiredBlock['siteaccess'], $avalaibleSiteAccessList ) )
@@ -64,6 +63,11 @@ foreach( $rows as $expiredBlock )
         $pageURL = 'http://' . $hostMapList[ strtolower( $expiredBlock['siteaccess'] )] . '/';
 
         $pageURL .= $expiredBlock['urlalias'];
+
+        // the page has already been called so everything has
+        // already been updated and viewcache has already been purged
+        if( in_array( $pageURL, $updatedPageList ) )
+            continue;
 
         // flushing content cache for this page if needed
         if( $viewCaching == 'enabled' )
@@ -92,7 +96,7 @@ foreach( $rows as $expiredBlock )
                 // 0 => false
                 // 1 => true or top level node
                 // you do not want that
-                if( is_numeric( $nodeID ) && $nodeID > 1 )
+                if( is_numeric( $nodeID ) and $nodeID > 1 )
                 {
                     eZContentCache::cleanup( array( $nodeID ) );
                     eZDebug::writeNotice( 'Clearing ViewCache for object ' . $nodeID, 'eZSIBlockFunction::process' );
@@ -101,6 +105,7 @@ foreach( $rows as $expiredBlock )
         }
 
         $cli->output( 'Calling ' . $cli->stylize( 'emphasize', $pageURL ) . ' : ', false );
+        $updatedPageList[] = $pageURL;
 
         // regenerating si blocks by calling the page
         // storing the results is useless
