@@ -1,7 +1,7 @@
 <?php
 //
 // SOFTWARE NAME: eZ publish
-// SOFTWARE RELEASE: 4.0.x
+// SOFTWARE RELEASE: 4.x.x
 // COPYRIGHT NOTICE: Copyright (C) 1999-2006 eZ systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
