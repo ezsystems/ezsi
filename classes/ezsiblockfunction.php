@@ -302,8 +302,7 @@ class eZSiBlockFunction
 
         if( !$this->SIBlockHandler->validateKey() )
         {
-            eZDebug::writeError( 'si-block : The key is not valid',
-                                 $functionPlacement[2] . '[' . $functionPlacement[0][0] . ']' );
+            $tpl->error( $this->FunctionName, 'si-block : The key is not valid', $functionPlacement );
 
             return false;
         }
@@ -319,8 +318,8 @@ class eZSiBlockFunction
 
         if( !$this->SIBlockHandler->validateTTL() )
         {
-            eZDebug::writeError( 'si-block : The TTL is not valid',
-                                 $functionPlacement[2] . '[' . $functionPlacement[0][0] . ']' );
+            $tpl->error( $this->FunctionName, 'si-block : The TTL is not valid', $functionPlacement );
+
             return false;
         }
 
