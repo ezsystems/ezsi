@@ -244,19 +244,14 @@ class eZSiBlockFunction
             $elementValue = join( '_', $elementValue );
         }
 
+        // values of the "key" attribute
+        // converted into a string
         $blockKeyArray[] = $elementValue;
 
+        // line number of the {si-block call}
         $blockKeyArray[] = $functionPlacement[0][0];
 
-        // this code is buggy since when the TTL is changed
-        // the value of the column is changed so the key
-        // will lead to unnecessary update
-        // $blockKeyArray[] = $functionPlacement[0][1];
-
         $blockKeyArray[] = $functionPlacement[1][0];
-
-        // same bug as above
-        //$blockKeyArray[] = $functionPlacement[1][1];
 
         // template's filepath
         $blockKeyArray[] = $functionPlacement[2];
