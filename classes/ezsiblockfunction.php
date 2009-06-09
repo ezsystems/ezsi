@@ -289,7 +289,7 @@ class eZSiBlockFunction
         return true;
     }
 
-    private function keyIsValid( $tpl, $rootNamespace, $currentNamespace, $functionParameters, $functionPlacement )
+    public function keyIsValid( $tpl, $rootNamespace, $currentNamespace, $functionParameters, $functionPlacement )
     {
         $keyString = $tpl->elementValue( $functionParameters['key'], $rootNamespace, $currentNamespace, $functionPlacement );
 
@@ -305,7 +305,7 @@ class eZSiBlockFunction
         return true;
     }
 
-    private function ttlIsValid( $tpl, $rootNamespace, $currentNamespace, $functionParameters, $functionPlacement )
+    public function ttlIsValid( $tpl, $rootNamespace, $currentNamespace, $functionParameters, $functionPlacement )
     {
         $ttlString = $tpl->elementValue( $functionParameters['ttl'], $rootNamespace, $currentNamespace, $functionPlacement );
 
