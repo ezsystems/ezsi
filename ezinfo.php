@@ -27,7 +27,7 @@ class eZSIInfo
     static function info()
     {
         return array( 'name' => "eZ SI",
-                      'version' => "1.1",
+                      'version' => "1.1-dev",
                       'copyright' => "Copyright (C) 1999-2009 eZ systems AS",
                       'license' => "GNU General Public License v2.0"
                     );
