@@ -5,6 +5,3 @@ Changes from 1.0alpha1 to 1.0stable
 
 *Enhancements:
 - rev. 11 : Switched to eZTemplate::error to rise a template error when a TTL or a key is invalid
-- rev. 19 : Updated keyIsValid and ttlIsValid visibility
-- rev. 20 : Added PHPUnit tests
-- rev. 21 : Delete si module
