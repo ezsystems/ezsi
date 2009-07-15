@@ -67,6 +67,8 @@ class eZSiBlockFunction
                 $forceRegenerationValue  = $ini->variable( 'TemplateFunctionSettings', 'ForceRegenerationValue' );
                 $SIFileHandler           = strtolower( $ini->variable( 'SIFilesSettings', 'FileHandler' ) );
                 $SIBlockHandler          = strtolower( $ini->variable( 'SIBlockSettings', 'BlockHandler' ) );
+                $cronjobForUpdatesOnly   = strtolower( $ini->variable( 'CronjobSettings', 'CronjobForUpdatesOnly' ) ) == 'yes' ? true : false;
+                $configuredUserAgent     = strtolower( $ini->variable( 'CronjobSettings', 'UserAgentName' ) );
 
                 // check for incompatible behavior, basically SSI + FTP
                 if( $SIFileHandler == 'ftp' and $SIBlockHandler == 'ssi' )
@@ -78,10 +80,16 @@ class eZSiBlockFunction
                 $regenerationIsForced = false;
 
                 $http = eZHTTPTool::instance();
-                if( $http->hasGetVariable( $forceRegenerationString ) and $http->getVariable( $forceRegenerationString ) == $forceRegenerationValue )
+                if( !$cronjobForUpdatesOnly
+                    and $http->hasGetVariable( $forceRegenerationString )
+                    and $http->getVariable( $forceRegenerationString ) == $forceRegenerationValue )
                 {
                     $regenerationIsForced = true;
                 }
+
+                $userAgent = null;
+                if( eZSys::serverVariable( 'HTTP_USER_AGENT' ) !== null )
+                    $userAgent = strtolower( eZSys::serverVariable( 'HTTP_USER_AGENT' ) );
 
                 $blockFilePathPreprendString = $ini->variable( 'SIBlockSettings', 'BlockFilePathPrependString' );
 
@@ -136,7 +144,12 @@ class eZSiBlockFunction
                         }
 
                         // expired ?
-                        if( $this->SIBlockHandler->fileIsExpired( $fileInfo[0]['mtime'] ) or $regenerationIsForced )
+                        if( $regenerationIsForced
+                            or
+                            ( $this->SIBlockHandler->fileIsExpired( $fileInfo[0]['mtime'] )
+                              and $cronjobForUpdatesOnly
+                              and $userAgent == $configuredUserAgent )
+                          )
                         {
                             eZDebug::writeNotice( 'file expired : ' . $blockKeyString, 'eZSIBlockFunction::process' );
 

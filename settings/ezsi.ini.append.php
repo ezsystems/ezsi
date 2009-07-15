@@ -59,6 +59,13 @@ ActivateSIMarkup=enabled
 
 [CronjobSettings]
 DeleteSIBlockOnFailure=enabled
+# setting this option will automatically
+# disable the ForceRegeneration* configuration
+# directives and so only update via the cronjob
+# will be possible
+# choose "yes" or "no"
+CronjobForUpdatesOnly=yes
+UserAgentName=ezsi
 
 [HostSettings]
 HostMatchMapItems[]

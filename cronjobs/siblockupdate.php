@@ -40,6 +40,14 @@ $SIBlockHandler          = $ini->variable( 'SIBlockSettings', 'BlockHandler' );
 $forceRegenerationString = $ini->variable( 'TemplateFunctionSettings', 'ForceRegenerationString' );
 $forceRegenerationValue  = $ini->variable( 'TemplateFunctionSettings', 'ForceRegenerationValue' );
 $hostMatchMapItems       = $ini->variable( 'HostSettings'            , 'HostMatchMapItems' );
+$cronjobForUpdatesOnly   = strtolower( $ini->variable( 'CronjobSettings', 'CronjobForUpdatesOnly' ) ) == 'yes' ? true : false;
+
+if( !$cronjobForUpdatesOnly )
+{
+    $cli->error( 'Cronjob disable, cf ezsi.ini/[CronjobSettings]/CronjobForUpdatesOnly' );
+    return;
+}
+
 
 $hostMapList = array();
 foreach( $hostMatchMapItems as $mapItems )
@@ -109,7 +117,7 @@ foreach( $rows as $expiredBlock )
 
         // regenerating si blocks by calling the page
         // storing the results is useless
-        if(  !@file_get_contents( $pageURL, FILE_BINARY ) )
+        if( !callPage( $pageURL ) )
         {
             $cli->output( $cli->stylize( 'red', 'FAILED' ) );
             removeFileIfNeeded( $expiredBlock, $db);
@@ -160,5 +168,32 @@ function removeFileIfNeeded( $expiredBlock, $db )
             eZDebug::writeError( 'Unable to remove the SI block row ' . $expiredBlock['namehash'] . ' from the database' );
         }
     }
+}
+
+function callPage( $URL )
+{
+    $ini       = eZINI::instance( 'ezsi.ini' );
+    $userAgent = $ini->variable( 'CronjobSettings', 'UserAgentName' );
+
+    $optionList = array( CURLOPT_URL            => $URL,
+                         CURLOPT_TIMEOUT        => 10,
+                         CURLOPT_RETURNTRANSFER => true,
+                         CURLOPT_NOBODY         => true );
+
+    if( $ini->variable( 'CronjobSettings', 'CronjobForUpdatesOnly' ) == 'yes' )
+        $optionList[CURLOPT_USERAGENT] = $userAgent;
+
+    $ch = curl_init();
+    if( !curl_setopt_array( $ch, $optionList ) )
+        return false;
+
+    $result = curl_exec( $ch );
+
+    curl_close( $ch );
+
+    if( $result != false or $result == "" ) // cf CURLOPT_NOBODY => true
+        return true;
+
+    return false;
 }
 ?>
