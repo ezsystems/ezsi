@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<project name="eZPublish" basedir="build" default="build">
+
+    <description>eZSI extension build file</description>
+
+    <property file="../properties/ezsi.properties"/>
+
+    <target name="infos">
+        <echo message="EZSI BUILD INFORMATIONS"/>
+        <echo message="-----------------------"/>
+        <echo message="ezsi.version.major : ${ezsi.version.major}"/>
+        <echo message="ezsi.version.minor : ${ezsi.version.minor}"/>
+        <echo message="ezsi.version.alias : ${ezsi.version.alias}"/>
+        <echo message="ezsi.svn.trunk.url : ${ezsi.svn.trunk.url}"/>
+    </target>
+
+    <target name="warning" depends="infos">
+        <echo message="Please check informations defined above are correct"/>
+        <echo message="If not feel free to update the properties/ezsi.properties file"/>
+        <echo message="This script will wait for 5 seconds before it starts"/>
+
+        <sleep seconds="5"/>
+    </target>
+
+    <target name="init" depends="warning">
+        <exec executable="svn" failonerror="true">
+            <arg value="export"/>
+            <arg value="${ezsi.svn.trunk.url}"/>
+            <arg value="ezsi"/>
+        </exec>
+    </target>
+
+    <target name="build" depends="init">
+        <echo message="Building documentation"/>
+        <exec executable="make" failonerror="true" dir="ezsi/doc/"/>
+
+        <echo message="Pruning useless files"/>
+        <delete file="ezsi/doc/documentation.rst"/>
+        <delete file="ezsi/doc/Makefile"/>
+
+        <echo message="Pruning unit tests"/>
+        <delete dir="ezsi/tests"/>
+
+        <echo message="Updating ezinfo.php"/>
+
+        <replaceregexp byline="true">
+            <regexp pattern='^(                      \047version\047 => ")(.*)(",)$'/>
+            <substitution expression='\1${ezsi.version.alias}\3'/>
+            <fileset file="ezsi/ezinfo.php"/>
+        </replaceregexp>
+
+        <delete dir="ezsi/build"/>
+    </target>
+
+    <target name="dist">
+        <tar destfile="ezsi-${ezsi.version.alias}.tar.gz"
+             compression="gzip"
+             longfile="gnu"
+             basedir="ezsi"/>
+
+    </target>
+
+    <target name="distclean">
+        <delete file="ezsi-${ezsi.version.alias}.tar.gz"/>
+    </target>
+
+    <target name="cleanall" depends="distclean">
+        <delete dir="ezsi"/>
+    </target>
+</project>
