@@ -8,10 +8,11 @@
     <target name="infos">
         <echo message="EZSI BUILD INFORMATIONS"/>
         <echo message="-----------------------"/>
-        <echo message="ezsi.version.major : ${ezsi.version.major}"/>
-        <echo message="ezsi.version.minor : ${ezsi.version.minor}"/>
-        <echo message="ezsi.version.alias : ${ezsi.version.alias}"/>
-        <echo message="ezsi.svn.trunk.url : ${ezsi.svn.trunk.url}"/>
+        <echo message="ezsi.version.major   : ${ezsi.version.major}"/>
+        <echo message="ezsi.version.minor   : ${ezsi.version.minor}"/>
+        <echo message="ezsi.version.release : ${ezsi.version.release}"/>
+        <echo message="ezsi.version.alias   : ${ezsi.version.alias}"/>
+        <echo message="ezsi.svn.trunk.url   : ${ezsi.svn.trunk.url}"/>
     </target>
 
     <target name="warning" depends="infos">
@@ -50,18 +51,19 @@
         </replaceregexp>
 
         <delete dir="ezsi/build"/>
+        <delete file="ezsi/build.xml"/>
     </target>
 
     <target name="dist">
-        <tar destfile="ezsi-${ezsi.version.alias}.tar.gz"
+        <tar destfile="ezsi-${ezsi.version.alias}.${ezsi.version.release}.tar.gz"
              compression="gzip"
              longfile="gnu"
-             basedir="ezsi"/>
+             basedir="${basedir}"/>
 
     </target>
 
     <target name="distclean">
-        <delete file="ezsi-${ezsi.version.alias}.tar.gz"/>
+        <delete file="ezsi-${ezsi.version.alias}.${ezsi.version.release}.tar.gz"/>
     </target>
 
     <target name="cleanall" depends="distclean">
