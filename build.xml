@@ -1,10 +1,40 @@
 <?xml version="1.0"?>
-<project name="eZSI" basedir="build" default="build">
+<project name="eZSI" default="all">
 
     <description>eZSI extension build file</description>
 
-    <property file="../properties/ezsi.properties"/>
+    <mkdir dir="build"/>
+    <!-- ================== -->
+    <!-- dynamic properties -->
+    <!-- ================== -->
 
+    <!-- current year -->
+    <tstamp>
+        <format property="date.current.year" pattern="yyyy"/>
+    </tstamp>
+
+    <!-- ========================= -->
+    <!-- end of dynamic properties -->
+    <!-- ========================= -->
+
+    <!-- ================= -->
+    <!-- static properties -->
+    <!-- ================= -->
+
+    <property name="ezsi.build.dir" location="build"/>
+    <property file="./ant/ezsi.properties"/>
+
+    <!-- ======================== -->
+    <!-- end of static properties -->
+    <!-- ======================== -->
+
+    <!-- ============================= -->
+    <!-- high level ( public ) targets -->
+    <!-- ============================= -->
+
+    <!-- Shows the list of properties used for building this extension -->
+    <!-- Anytime the ezsi.properties file is update, this target must  -->
+    <!-- me update as well                                             -->
     <target name="infos">
         <echo message="EZSI BUILD INFORMATION"/>
         <echo message="----------------------"/>
@@ -13,8 +43,13 @@
         <echo message="ezsi.version.release : ${ezsi.version.release}"/>
         <echo message="ezsi.version.alias   : ${ezsi.version.alias}"/>
         <echo message="ezsi.svn.trunk.url   : ${ezsi.svn.trunk.url}"/>
+        <echo message="ezsi.build.dir       : ${ezsi.build.dir}"/>
     </target>
 
+    <!-- Displays a warning before building the extension        -->
+    <!-- Also waits for 5 seconds before starting the real build -->
+    <!-- This makes it possible to interrupt the script before   -->
+    <!-- any real task is done                                   -->
     <target name="warning" depends="infos">
         <echo message="Please check informations defined above are correct"/>
         <echo message="If not feel free to update the properties/ezsi.properties file"/>
@@ -23,50 +58,111 @@
         <sleep seconds="5"/>
     </target>
 
+    <!-- Prepares the build                               -->
+    <!-- Runs an svn export of the extension's repository -->
     <target name="init" depends="warning">
         <exec executable="svn" failonerror="true">
             <arg value="export"/>
             <arg value="${ezsi.svn.trunk.url}"/>
-            <arg value="ezsi"/>
+            <arg value="${ezsi.build.dir}/ezsi"/>
         </exec>
     </target>
 
+    <!-- Builds the extension once the SVN repository is exported -->
+    <!-- Removes all unit test for the distribution               -->
+    <!-- Generates the documentation                              -->
+    <!-- Prune miscaellanous useless files                        -->
     <target name="build" depends="init">
-        <echo message="Building documentation"/>
-        <exec executable="make" failonerror="true" dir="ezsi/doc/"/>
-
-        <echo message="Pruning useless files"/>
-        <delete file="ezsi/doc/documentation.rst"/>
-        <delete file="ezsi/doc/Makefile"/>
+        <antcall target="doc"/>
 
         <echo message="Pruning unit tests"/>
-        <delete dir="ezsi/tests"/>
+        <delete dir="${ezsi.build.dir}/ezsi/tests"/>
 
+        <antcall target="update-license-headers"/>
+        <antcall target="update-ezinfo-php"/>
+    </target>
+
+    <!-- Creates a tarball of the newly built extension -->
+    <target name="dist">
+        <mkdir dir="dist"/>
+
+        <tar destfile="dist/ezsi-${ezsi.version.alias}.${ezsi.version.release}.tar.gz"
+             compression="gzip"
+             longfile="gnu"
+             basedir="${ezsi.build.dir}"/>
+
+    </target>
+
+    <!-- Meta target, calls build and dist -->
+    <target name="all" depends="build,dist"/>
+
+    <!-- Generates the documentaion for this extension -->
+    <target name="doc">
+        <echo message="Building documentation"/>
+        <exec executable="make" failonerror="true" dir="${ezsi.build.dir}/ezsi/doc/"/>
+
+        <echo message="Pruning useless files"/>
+        <delete file="${ezsi.build.dir}/ezsi/doc/documentation.rst"/>
+        <delete file="${ezsi.build.dir}/ezsi/doc/Makefile"/>
+    </target>
+
+    <!-- Cleans the generated tarball by dist-->
+    <target name="distclean">
+        <delete dir="dist"/>
+    </target>
+
+    <!-- Purge everything in the build directory -->
+    <!-- Also remove the build directory         -->
+    <target name="cleanall" depends="distclean">
+        <delete dir="${ezsi.build.dir}"/>
+    </target>
+
+    <!-- ==================================== -->
+    <!-- end of high level ( public ) targets -->
+    <!-- ==================================== -->
+
+    <!-- ====================================================== -->
+    <!-- low level ( private ) targets, for internal usage ONLY -->
+    <!-- ====================================================== -->
+
+    <!-- Updates the license headers with correct version numbers -->
+    <!-- Updates the // SOFTWARE RELEASE line                     -->
+    <!-- Updates the // COPYRIGHT NOTICE line                     -->
+    <target name="update-license-headers">
+        <echo message="Updating license headers"/>
+
+        <!-- SOFTWARE RELEASE -->
+        <replaceregexp byline="true">
+            <regexp pattern="// SOFTWARE RELEASE: (.*)"/>
+            <substitution expression="// SOFTWARE RELEASE: ${ezsi.version.alias}-${ezsi.version.release}"/>
+            <fileset dir="${ezsi.build.dir}">
+                <include name="**/*.php"/>
+            </fileset>
+        </replaceregexp>
+
+        <!-- COPYRIGHT NOTICE -->
+        <replaceregexp byline="true">
+            <regexp pattern="// COPYRIGHT NOTICE: Copyright \(C\) 1999-[\d]{4} eZ Systems AS"/>
+            <substitution expression="// COPYRIGHT NOTICE: Copyright (C) 1999-${date.current.year} eZ Systems AS"/>
+            <fileset dir="${ezsi.build.dir}">
+                <include name="**/*.php"/>
+            </fileset>
+        </replaceregexp>
+    </target>
+
+    <!-- Updates ezinfo.php with correct version numbers -->
+    <target name="update-ezinfo-php">
         <echo message="Updating ezinfo.php"/>
 
         <replaceregexp byline="true">
-            <regexp pattern='^(                      \047version\047 => ")(.*)(",)$'/>
-            <substitution expression='\1${ezsi.version.alias}\3'/>
-            <fileset file="ezsi/ezinfo.php"/>
+            <regexp pattern="^(                      \047version\047 => \042)(.*)(\042,)$"/>
+            <substitution expression='\1${ezsi.version.alias}-${ezsi.version.release}\3'/>
+            <fileset dir="${ezsi.build.dir}" includes="**/*ezinfo.php"/>
         </replaceregexp>
-
-        <delete dir="ezsi/build"/>
-        <delete file="ezsi/build.xml"/>
     </target>
 
-    <target name="dist">
-        <tar destfile="ezsi-${ezsi.version.alias}.${ezsi.version.release}.tar.gz"
-             compression="gzip"
-             longfile="gnu"
-             basedir="${basedir}"/>
+    <!-- ============================================================= -->
+    <!-- end of low level ( private ) targets, for internal usage ONLY -->
+    <!-- ============================================================= -->
 
-    </target>
-
-    <target name="distclean">
-        <delete file="ezsi-${ezsi.version.alias}.${ezsi.version.release}.tar.gz"/>
-    </target>
-
-    <target name="cleanall" depends="distclean">
-        <delete dir="ezsi"/>
-    </target>
 </project>
