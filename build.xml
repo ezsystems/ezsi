@@ -6,8 +6,8 @@
     <property file="../properties/ezsi.properties"/>
 
     <target name="infos">
-        <echo message="EZSI BUILD INFORMATIONS"/>
-        <echo message="-----------------------"/>
+        <echo message="EZSI BUILD INFORMATION"/>
+        <echo message="----------------------"/>
         <echo message="ezsi.version.major   : ${ezsi.version.major}"/>
         <echo message="ezsi.version.minor   : ${ezsi.version.minor}"/>
         <echo message="ezsi.version.release : ${ezsi.version.release}"/>
