@@ -80,6 +80,9 @@
 
         <antcall target="update-license-headers"/>
         <antcall target="update-ezinfo-php"/>
+
+        <delete dir="${ezsi.build.dir}/ezsi/ant"/>
+        <delete file="${ezsi.build.dir}/ezsi/build.xml"/>
     </target>
 
     <!-- Creates a tarball of the newly built extension -->
@@ -100,9 +103,6 @@
     <target name="doc">
         <echo message="Building documentation"/>
         <exec executable="make" failonerror="true" dir="${ezsi.build.dir}/ezsi/doc/"/>
-
-        <echo message="Pruning useless files"/>
-        <delete file="${ezsi.build.dir}/ezsi/doc/documentation.rst"/>
         <delete file="${ezsi.build.dir}/ezsi/doc/Makefile"/>
     </target>
 
