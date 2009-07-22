@@ -154,8 +154,8 @@
     <target name="update-ezinfo-php">
         <echo message="Updating ezinfo.php"/>
 
-        <replaceregexp byline="true">
-            <regexp pattern="^(                      \047version\047 => \042)(.*)(\042,)$"/>
+        <replaceregexp byline="true" flags="i">
+            <regexp pattern="^([\s]+\047version\047 => \042)(.*)(\042,)$"/>
             <substitution expression='\1${ezsi.version.alias}-${ezsi.version.release}\3'/>
             <fileset dir="${ezsi.build.dir}" includes="**/*ezinfo.php"/>
         </replaceregexp>
