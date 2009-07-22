@@ -52,7 +52,7 @@
     <!-- any real task is done                                   -->
     <target name="warning" depends="infos">
         <echo message="Please check informations defined above are correct"/>
-        <echo message="If not feel free to update the properties/ezsi.properties file"/>
+        <echo message="If not feel free to update the ant/ezsi.properties file"/>
         <echo message="This script will wait for 5 seconds before it starts"/>
 
         <sleep seconds="5"/>
