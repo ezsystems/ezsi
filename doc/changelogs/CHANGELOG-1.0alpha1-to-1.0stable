@@ -1,4 +1,4 @@
-Changes from 1.0alpha1 to 1.0stable
+Changes from 1.0alpha1 to 1.0stable - released 2009/04/09
 
 *Bugfixes:
 - rev. 12 : Fixed a multiple call for one page which contains multiple si-blocks
