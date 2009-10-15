@@ -258,7 +258,10 @@ class eZSIBlockFunctionTest extends ezpTestCase
         $this->assertFalse( $result, 'an invalid integer ttl should make {si-block} break' );
     }
 
-    // Testing ESI block tag generation
+    /**
+     Testing ESI block tag generation
+     @bug will not work on Oracle
+    */
     public function testESIBlockGeneration()
     {
         $key = 'dummykey';
