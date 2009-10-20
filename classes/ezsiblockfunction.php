@@ -346,7 +346,7 @@ class eZSiBlockFunction
     private function fileExists( $filePath )
     {
         $db   = eZDB::instance();
-        $sql  = 'SELECT ttl, mtime FROM ezsi_files WHERE namehash = "' . md5( $filePath ) . '"';
+        $sql  = "SELECT ttl, mtime FROM ezsi_files WHERE namehash = '" . md5( $filePath ) . "'";
         $rows = $db->arrayQuery( $sql );
 
         if( count( $rows ) == 1 )
@@ -368,14 +368,14 @@ class eZSiBlockFunction
         $accessName = $GLOBALS['eZCurrentAccess']['name'];
 
         $db = eZDB::instance();
-        $sql = 'INSERT INTO ezsi_files ( filepath, namehash, mtime, urlalias, siteaccess, ttl, blockkeys )
-                VALUES( "' . $db->escapeString( trim( $filePath ) )        . '", "'
-                           . $db->escapeString( md5( trim( $filePath ) ) ) . '", "'
-                           . time()                                        . '", "'
-                           . $db->escapeString( trim( $urlAlias ) )        . '", "'
-                           . $db->escapeString( trim( $accessName ) )      . '", "'
-                           . $db->escapeString( trim( $TTLInSeconds ) )    . '", "'
-                           . $db->escapeString( trim( $blockKeyString ) )  . '" )';
+        $sql = "INSERT INTO ezsi_files ( filepath, namehash, mtime, urlalias, siteaccess, ttl, blockkeys )
+                VALUES( '" . $db->escapeString( trim( $filePath ) )        . "', '"
+                           . $db->escapeString( md5( trim( $filePath ) ) ) . "', "
+                           . time()                                        . ", '"
+                           . $db->escapeString( trim( $urlAlias ) )        . "', '"
+                           . $db->escapeString( trim( $accessName ) )      . "', "
+                           . (int) $TTLInSeconds                           . ", '"
+                           . $db->escapeString( trim( $blockKeyString ) )  . "' )";
 
         eZDebug::writeNotice( $sql, 'Creating rows' );
 
@@ -385,8 +385,8 @@ class eZSiBlockFunction
     private function updateRow( $filePath, $TTLInSeconds )
     {
         $db = eZDB::instance();
-        $sql = 'UPDATE ezsi_files SET mtime = ' . time() . ', ttl = ' . $TTLInSeconds . '
-                WHERE namehash = "'. $db->escapeString( md5( $filePath ) ).'"';
+        $sql = 'UPDATE ezsi_files SET mtime = ' . time() . ', ttl = ' . $TTLInSeconds . "
+                WHERE namehash = '" . $db->escapeString( md5( $filePath ) ) . "'";
 
         eZDebug::writeNotice( $sql, 'Updating rows' );
 
@@ -472,7 +472,7 @@ class eZSiBlockFunction
             eZDebug::writeNotice( 'The ttl needs to be updated', 'eZSIBlockFunction::updateTTLIfNeeded' );
 
             $db  = eZDB::instance();
-            $sql = 'UPDATE ezsi_files SET ttl = ' . $ttlInfo . ' WHERE namehash = "' . $db->escapeString( $nameHash ) . '"';
+            $sql = 'UPDATE ezsi_files SET ttl = ' . $ttlInfo . " WHERE namehash = '" . $db->escapeString( $nameHash ) . "'";
 
             eZDebug::writeNotice( $sql, 'eZSIBlockFunction::updateTTLIfNeeded' );
 
