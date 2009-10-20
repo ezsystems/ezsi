@@ -73,7 +73,7 @@ class eZSiBlockFunction
                 // check for incompatible behavior, basically SSI + FTP
                 if( $SIFileHandler == 'ftp' and $SIBlockHandler == 'ssi' )
                 {
-                    eZDebug::writeError( 'Incompatible configuration, SSI + FTP is not allowed', 'eZSIBlockFunction::process' );
+                    eZDebug::writeError( 'Incompatible configuration, SSI + FTP is not allowed', __METHOD__ );
                     break;
                 }
 
@@ -107,7 +107,7 @@ class eZSiBlockFunction
                 {
                     $blockKeyString = $this->generateBlockKeyString( $tpl, $rootNamespace, $currentNamespace, $functionParameters, $functionPlacement );
 
-                    eZDebug::writeNotice( $blockKeyString, 'eZSIBlockFunction::process' );
+                    eZDebug::writeNotice( $blockKeyString, __METHOD__ );
 
                     // generating filepath
                     $cacheDir = $this->cacheBaseSubdir();
@@ -120,7 +120,7 @@ class eZSiBlockFunction
 
                     $filePath = $blockFilePathPreprendString . $cacheDir . '/' . $fileName;
 
-                    eZDebug::writeNotice( $filePath, 'eZSIBlockFunction::process' );
+                    eZDebug::writeNotice( $filePath, __METHOD__ );
 
                     if( $SIBlockHandler == 'ssi' )
                     {
@@ -134,7 +134,7 @@ class eZSiBlockFunction
                     // file exists ?
                     if( $fileInfo = $this->fileExists( $filePath ) )
                     {
-                        eZDebug::writeNotice( 'file exists : ' . $blockKeyString, 'eZSIBlockFunction::process' );
+                        eZDebug::writeNotice( 'file exists : ' . $blockKeyString, __METHOD__ );
 
                         // does the ttl needs to be updated ?
                         $blockTTL = $tpl->elementValue( $functionParameters['ttl'], $rootNamespace, $currentNamespace, $functionPlacement );
@@ -151,7 +151,7 @@ class eZSiBlockFunction
                               and $userAgent == $configuredUserAgent )
                           )
                         {
-                            eZDebug::writeNotice( 'file expired : ' . $blockKeyString, 'eZSIBlockFunction::process' );
+                            eZDebug::writeNotice( 'file expired : ' . $blockKeyString, __METHOD__ );
 
                             $htmlContents = $this->processChildren( $tpl, $functionChildren, $rootNamespace, $currentNamespace );
 
@@ -165,7 +165,7 @@ class eZSiBlockFunction
                                 if( !$this->updateRow( $filePath, $this->SIBlockHandler->TTLInSeconds() ) )
                                 {
                                     $this->SIFileHandler->removeFile( $cacheDir, $fileName );
-                                    eZDebug::writeError( $filePath . ' could not be updated', 'eZSIBlockFunction::process' );
+                                    eZDebug::writeError( $filePath . ' could not be updated', __METHOD__ );
                                     $db->rollback();
                                 }
                                 else
@@ -185,12 +185,12 @@ class eZSiBlockFunction
                             }
                             else
                             {
-                                eZDebug::writeError( 'Unable to store the file : ' . $filePath, 'eZSIBlockFunction::process' );
+                                eZDebug::writeError( 'Unable to store the file : ' . $filePath, __METHOD__ );
                             }
                         }
                         else
                         {
-                            eZDebug::writeNotice( 'file valid : ' . $blockKeyString, 'eZSIBlockFunction::process' );
+                            eZDebug::writeNotice( 'file valid : ' . $blockKeyString, __METHOD__ );
 
                             if( $SIMarkupIsEnabled )
                             {
@@ -204,7 +204,7 @@ class eZSiBlockFunction
                     }
                     else
                     {
-                        eZDebug::writeNotice( 'file does not exists : ' . $blockKeyString, 'eZSIBlockFunction::process' );
+                        eZDebug::writeNotice( 'file does not exists : ' . $blockKeyString, __METHOD__ );
 
                         $htmlContents = $this->processChildren( $tpl, $functionChildren, $rootNamespace, $currentNamespace );
 
@@ -218,7 +218,7 @@ class eZSiBlockFunction
                             if( !$this->writeRow( $filePath, $this->SIBlockHandler->TTLInSeconds(), $blockKeyString ) )
                             {
                                 $this->SIFileHandler->removeFile( $cacheDir, $fileName );
-                                eZDebug::writeError( $filePath . ' could not be created', 'eZSIBlockFunction::process' );
+                                eZDebug::writeError( $filePath . ' could not be created', __METHOD__ );
                                 $db->rollback();
                             }
                             else
@@ -238,7 +238,7 @@ class eZSiBlockFunction
                         }
                         else
                         {
-                            eZDebug::writeError( 'Unable to store the file : ' . $filePath, 'eZSIBlockFunction::process' );
+                            eZDebug::writeError( 'Unable to store the file : ' . $filePath, __METHOD__ );
                         }
                     }
                 }
@@ -293,7 +293,7 @@ class eZSiBlockFunction
         }
         $text = join( '', $childTextElements );
 
-        eZDebug::writeNotice( $text, 'eZSIBlockFunction::process' );
+        eZDebug::writeNotice( $text, __METHOD__ );
         return $text;
     }
 
@@ -338,7 +338,7 @@ class eZSiBlockFunction
     {
         $uniqueFilename = md5( $SIBlockKey  );
 
-        eZDebug::writeNotice( $uniqueFilename, 'eZSIBlockFunction::generateUniqueFilename' );
+        eZDebug::writeNotice( $uniqueFilename, __METHOD__ );
 
         return $uniqueFilename.'.htm';
     }
@@ -417,22 +417,20 @@ class eZSiBlockFunction
     {
         $ini                    = eZINI::instance( 'ezsi.ini' );
         $SIBlockHandlerName     = strtolower( $ini->variable( 'SIBlockSettings', 'BlockHandler' ) );
-        $SIBlockHandlerFilePath = 'extension/ezsi/classes/blockhandlers/'
-                                  . $SIBlockHandlerName
-                                  . '/ezsi'
-                                  . $SIBlockHandlerName
-                                  . 'blockhandler.php';
-
-        if( file_exists( $SIBlockHandlerFilePath ) )
+        $SIBlockHandlerClassName = 'ezsi' . $SIBlockHandlerName . 'blockHandler';
+        eZDebug::writeNotice( 'Loading ' . $SIBlockHandlerClassName, __METHOD__ );
+        if( class_exists( $SIBlockHandlerClassName ) )
         {
-            eZDebug::writeNotice( 'Loading ' . $SIBlockHandlerFilePath, 'eZSIBlockFunction::loadSIBlockHandler' );
-            include_once( $SIBlockHandlerFilePath );
-            $SIBlockHandlerClassName = 'ezsi' . $SIBlockHandlerName . 'blockHandler';
             return new $SIBlockHandlerClassName();
         }
         else
         {
-            eZDebug::writeError( $SIBlockHandlerFilePath . ' does not exists ', 'eZSI::loadSIBlockHandler' );
+            $SIBlockHandlerFilePath = 'extension/ezsi/classes/blockhandlers/'
+                                  . $SIBlockHandlerName
+                                  . '/ezsi'
+                                  . $SIBlockHandlerName
+                                  . 'blockhandler.php';
+            eZDebug::writeError( 'class ' . $SIBlockHandlerClassName . ' does not exist. Check ' . $SIBlockHandlerFilePath, __METHOD__ );
         }
 
         return false;
@@ -450,14 +448,14 @@ class eZSiBlockFunction
 
         if( file_exists( $SIFileHandlerFilePath ) )
         {
-            eZDebug::writeNotice( 'Loading ' . $SIFileHandlerFilePath, 'eZSIBlockFunction::loadSIFileHandler' );
+            eZDebug::writeNotice( 'Loading ' . $SIFileHandlerFilePath, __METHOD__ );
             include_once( $SIFileHandlerFilePath );
             $SIFileHandlerClassName = 'ezsi' . $SIFileHandlerName . 'filehandler';
             return call_user_func( array( $SIFileHandlerClassName, 'instance' ) );
         }
         else
         {
-            eZDebug::writeError( $SIFileHandlerFilePath . ' does not exists ', 'eZSI::loadSIFileHandler' );
+            eZDebug::writeError( $SIFileHandlerFilePath . ' does not exists ', __METHOD__ );
         }
 
         return false;
@@ -474,7 +472,7 @@ class eZSiBlockFunction
             $db  = eZDB::instance();
             $sql = 'UPDATE ezsi_files SET ttl = ' . $ttlInfo . " WHERE namehash = '" . $db->escapeString( $nameHash ) . "'";
 
-            eZDebug::writeNotice( $sql, 'eZSIBlockFunction::updateTTLIfNeeded' );
+            eZDebug::writeNotice( $sql, __METHOD__ );
 
             // update the TTL in the current process
             // makes it possible to update the cache file
