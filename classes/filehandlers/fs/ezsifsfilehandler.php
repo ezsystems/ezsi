@@ -46,7 +46,7 @@ class eZSIFSFileHandler extends eZSIFileHandler
 
     public function removeFile( $directory, $fileName )
     {
-        eZDebug::writeNotice( 'Removing ' . $directory . '/' . $fileName, 'eZSIFSFileHandler::removeFile'  );
+        eZDebug::writeNotice( 'Removing ' . $directory . '/' . $fileName, __METHOD__ );
         return @unlink( $directory . '/' . $fileName );
     }
 }

@@ -35,7 +35,7 @@ class eZSIESIBlockHandler extends eZSIBlockHandler
         $ttlInfos = $this->parseTTL();
 
         $markup = '<esi:include src="' . $this->Src . '" ttl="' . $ttlInfos['ttl_value'] . $ttlInfos['ttl_unit'] . '" onerror="continue"/>';
-        eZDebug::writeNotice( $markup, 'eZSIESIBlockHandler::generateMarkup' );
+        eZDebug::writeNotice( $markup, __METHOD__ );
         return $markup;
     }
 }

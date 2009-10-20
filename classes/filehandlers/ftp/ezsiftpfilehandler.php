@@ -38,7 +38,7 @@ class eZSIFTPFileHandler extends eZSIFileHandler
     {
         if( is_resource( $this->ConnectionResource ) )
         {
-            eZDebug::writeError( 'No Connexion Resource available', 'eZSIFTPFileHandler::connect' );
+            eZDebug::writeError( 'No Connexion Resource available', __METHOD__ );
             return false;
         }
 
@@ -66,11 +66,11 @@ class eZSIFTPFileHandler extends eZSIFileHandler
                 //if( !@ftp_mkdir( $this->ConnectionResource, 'si-blocks' ) )
                 if( !$this->mkDir( $destinationFolder ) )
                 {
-                    eZDebug::writeError( 'Unable to create dir ' . $destinationFolder, 'eZSIFTPFileHandler::eZSIFTPFileHandler' );
+                    eZDebug::writeError( 'Unable to create dir ' . $destinationFolder, __METHOD__ );
                 }
 
                 // dir should exists now
-                eZDebug::writeNotice( 'CWD : ' . ftp_pwd( $this->ConnectionResource), 'eZSIFTPFileHandler::eZSIFTPFileHandler' );
+                eZDebug::writeNotice( 'CWD : ' . ftp_pwd( $this->ConnectionResource), __METHOD__ );
                 ftp_chdir( $this->ConnectionResource, $destinationFolder );
             }
 
@@ -83,7 +83,7 @@ class eZSIFTPFileHandler extends eZSIFileHandler
         }
         else
         {
-            eZDebug::writeError( 'Unable to connect to FTP server', 'eZSIFTPFileHandler' );
+            eZDebug::writeError( 'Unable to connect to FTP server', __METHOD__ );
 
             return false;
         }
@@ -107,7 +107,7 @@ class eZSIFTPFileHandler extends eZSIFileHandler
                     return false;
                 }
 
-                eZDebug::writeNotice( 'Creating ' . $path, 'eZSIFTPFileHandler::mkDir' );
+                eZDebug::writeNotice( 'Creating ' . $path, __METHOD__ );
             }
         }
 
@@ -148,7 +148,7 @@ class eZSIFTPFileHandler extends eZSIFileHandler
 
         if( !ftp_put( $this->ConnectionResource, $fileName, $tmpFilePath, FTP_BINARY ) )
         {
-            eZDebug::writeError( 'Unable to upload the file', 'eZSIFTPFileHandler::storeFile' );
+            eZDebug::writeError( 'Unable to upload the file', __METHOD__ );
             return false;
         }
 
@@ -167,7 +167,7 @@ class eZSIFTPFileHandler extends eZSIFileHandler
 
         if( !ftp_delete( $this->ConnectionResource, $fileName ) )
         {
-            eZDebug::writeError( 'Unable to delete file', 'eZSIFTPFileHandler::removeFile' );
+            eZDebug::writeError( 'Unable to delete file', __METHOD__ );
             return false;
         }
 
