@@ -28,8 +28,6 @@
 // ## END COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 //
 
-include_once( 'extension/ezsi/classes/ezsiblockfunction.php' );
-
 $ini                     = eZINI::instance( 'site.ini' );
 $avalaibleSiteAccessList = $ini->variable( 'SiteAccessSettings', 'AvailableSiteAccessList' );
 $viewCaching             = $ini->variable( 'ContentSettings', 'ViewCaching' );
