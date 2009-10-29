@@ -416,8 +416,8 @@ class eZSiBlockFunction
     public static function loadSIBlockHandler()
     {
         $ini                    = eZINI::instance( 'ezsi.ini' );
-        $SIBlockHandlerName     = strtolower( $ini->variable( 'SIBlockSettings', 'BlockHandler' ) );
-        $SIBlockHandlerClassName = 'ezsi' . $SIBlockHandlerName . 'blockHandler';
+        $SIBlockHandlerName     = $ini->variable( 'SIBlockSettings', 'BlockHandler' );
+        $SIBlockHandlerClassName = 'eZSI' . $SIBlockHandlerName . 'BlockHandler';
         eZDebug::writeNotice( 'Loading ' . $SIBlockHandlerClassName, __METHOD__ );
         if( class_exists( $SIBlockHandlerClassName ) )
         {
@@ -426,9 +426,9 @@ class eZSiBlockFunction
         else
         {
             $SIBlockHandlerFilePath = 'extension/ezsi/classes/blockhandlers/'
-                                  . $SIBlockHandlerName
+                                  . strtolower( $SIBlockHandlerName )
                                   . '/ezsi'
-                                  . $SIBlockHandlerName
+                                  . strtolower( $SIBlockHandlerName )
                                   . 'blockhandler.php';
             eZDebug::writeError( 'class ' . $SIBlockHandlerClassName . ' does not exist. Check ' . $SIBlockHandlerFilePath, __METHOD__ );
         }
