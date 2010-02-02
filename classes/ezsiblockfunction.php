@@ -208,6 +208,23 @@ class eZSiBlockFunction
 
                         $htmlContents = $this->processChildren( $tpl, $functionChildren, $rootNamespace, $currentNamespace );
 
+                        // A different process might have just generated
+                        // the file after processing a very heavy template
+                        // this avoid using a mutex
+                        if( $this->fileExists() )
+                        {
+                            if( $SIMarkupIsEnabled )
+                            {
+                                $textElements[] = $this->SIBlockHandler->generateMarkup();
+                            }
+                            else
+                            {
+                                $textElements[] = $htmlContents;
+                            }
+
+                            break;
+                        }
+
                         $db = eZDB::instance();
                         $db->begin();
 
