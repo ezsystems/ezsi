@@ -2,7 +2,7 @@
 //
 // SOFTWARE NAME: eZ publish
 // SOFTWARE RELEASE: 4.x.x
-// COPYRIGHT NOTICE: Copyright (C) 1999-2009 eZ Systems AS
+// COPYRIGHT NOTICE: Copyright (C) 1999-2010 eZ Systems AS
 // SOFTWARE LICENSE: GNU General Public License v2.0
 // NOTICE: >
 //   This program is free software; you can redistribute it and/or
@@ -28,7 +28,7 @@ class eZSIInfo
     {
         return array( 'name' => "eZ SI",
                       'version' => '1.2-dev',
-                      'copyright' => "Copyright (C) 1999-2009 eZ Systems AS",
+                      'copyright' => "Copyright (C) 1999-2010 eZ Systems AS",
                       'license' => "GNU General Public License v2.0"
                     );
     }
