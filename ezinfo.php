@@ -26,7 +26,7 @@ class eZSIInfo
 {
     static function info()
     {
-        return array( 'Vame' => "eZ SI",
+        return array( 'Name' => "eZ SI",
                       'Version' => '1.2',
                       'Copyright' => "Copyright (C) 1999-2010 eZ Systems AS",
                       'License' => "GNU General Public License v2.0"
