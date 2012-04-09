@@ -28,9 +28,9 @@
 // ## END COPYRIGHT, LICENSE AND WARRANTY NOTICE ##
 //
 
-class eZSiBlockFunction
+class eZSIBlockFunction
 {
-    public function eZSiBlockFunction( $functionName = 'si-block' )
+    public function eZSIBlockFunction( $functionName = 'si-block' )
     {
         $this->FunctionName = $functionName;
 
