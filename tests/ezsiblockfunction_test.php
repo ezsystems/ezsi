@@ -7,8 +7,6 @@
  * @package tests
  */
 
-include_once( 'kernel/common/template.php' );
-
 class eZSIBlockFunctionTest extends ezpTestCase
 {
     const SI_BLOCK_FUNCTION_NAME = 'si-block';
@@ -31,7 +29,7 @@ class eZSIBlockFunctionTest extends ezpTestCase
 
         $this->setName( "eZSIBlockFunctionTest" );
 
-        $this->templateResource   = templateInit();
+        $this->templateResource   = eZTemplate::factory();
         $this->rootNamespace      = '';
         $this->currentNamespace   = '';
         $this->textElements       = array();
