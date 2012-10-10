@@ -147,7 +147,7 @@ function removeFileIfNeeded( $expiredBlock, $db )
     $ini                    = eZINI::instance( 'ezsi.ini' );
     $deleteSIBlockOnFailure = $ini->variable( 'CronjobSettings', 'DeleteSIBlockOnFailure' );
 
-    $fileHandler = eZSIBlockFunction::loadSIFileHandler();
+    $fileHandler = eZSiBlockFunction::loadSIFileHandler();
 
     if( $deleteSIBlockOnFailure == 'enabled' )
     {
