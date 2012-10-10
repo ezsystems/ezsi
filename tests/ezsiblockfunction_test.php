@@ -88,7 +88,7 @@ class eZSIBlockFunctionTest extends ezpTestCase
      */
     private function processKeyIsValidFunction( $key )
     {
-        $eZSIBlock = new eZSiBlockFunction();
+        $eZSIBlock = new eZSIBlockFunction();
 
         $ttl = '1s';
         $functionParameters = $this->buildFunctionParameters( $key, $ttl );
@@ -109,7 +109,7 @@ class eZSIBlockFunctionTest extends ezpTestCase
      */
     private function processTTLIsValidFunction( $ttl )
     {
-        $eZSIBlock = new eZSiBlockFunction();
+        $eZSIBlock = new eZSIBlockFunction();
 
         $key = 'dummykey';
         $functionParameters = $this->buildFunctionParameters( $key, $ttl );
