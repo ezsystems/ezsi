@@ -435,10 +435,21 @@ Adding mod_filter rules
 In your site's VirtualHost you can simply copy/paste the following
 configuration directive
 
+**Apache 2.2**
+
 ::
 
     FilterDeclare SSI
     FilterProvider SSI INCLUDES resp=Content-Type $text/html
+    FilterChain SSI
+
+
+**Apache 2.4**
+
+::
+
+    FilterDeclare SSI
+    FilterProvider SSI INCLUDES "%{CONTENT_TYPE} =~ m|^text/html|i"
     FilterChain SSI
 
 Specific Rewrite Rule
@@ -459,6 +470,7 @@ VirtualHost example
 Here is a complete example of a working VirtualHost that contains
 all the needed mod_filter configuration directives.
 
+**Apache 2.2**
 
 ::
 
@@ -501,3 +513,49 @@ all the needed mod_filter configuration directives.
         FilterProvider SSI INCLUDES resp=Content-Type $text/html
         FilterChain SSI
     </VirtualHost>
+
+
+**Apache 2.4**
+
+::
+
+    <VirtualHost *>
+
+       ServerName site.com
+       DocumentRoot /var/www/site.com
+
+       <Directory /var/www/site.com>
+           # The +Includes options is needed to accept SSI markup parsing
+           Options +Indexes +FollowSymLinks +Includes
+           AllowOverride None
+       </Directory>
+
+       DirectoryIndex index.php
+
+       <IfModule mod_rewrite.c>
+           RewriteEngine On
+           Rewriterule ^/var/si-blocks/.* - [L]
+           Rewriterule ^/var/storage/.* - [L]
+           Rewriterule ^/var/[^/]+/storage/.* - [L]
+           RewriteRule ^/var/cache/texttoimage/.* - [L]
+           RewriteRule ^/var/[^/]+/cache/texttoimage/.* - [L]
+           Rewriterule ^/design/[^/]+/(stylesheets|images|javascript)/.* - [L]
+           Rewriterule ^/share/icons/.* - [L]
+           Rewriterule ^/extension/[^/]+/design/[^/]+/(stylesheets|images|javascripts?)/.* - [L]
+           Rewriterule ^/packages/styles/.+/(stylesheets|images|javascript)/[^/]+/.* - [L]
+           RewriteRule ^/packages/styles/.+/thumbnail/.* - [L]
+           RewriteRule ^/favicon\.ico - [L]
+           RewriteRule ^/robots\.txt - [L]
+
+           # Uncomment the following lines when using popup style debug.
+           # RewriteRule ^/var/cache/debug\.html.* - [L]
+           # RewriteRule ^/var/[^/]+/cache/debug\.html.* - [L]
+
+           RewriteRule .* /index.php
+       </IfModule>
+
+        FilterDeclare SSI
+        FilterProvider SSI INCLUDES "%{CONTENT_TYPE} =~ m|^text/html|i"
+        FilterChain SSI
+    </VirtualHost>
+
