@@ -489,22 +489,11 @@ all the needed mod_filter configuration directives.
 
        <IfModule mod_rewrite.c>
            RewriteEngine On
+           
+           # Rewriterule needed by ezsi, make sure to place it among the first rules after statement above
            Rewriterule ^/var/si-blocks/.* - [L]
-           Rewriterule ^/var/storage/.* - [L]
-           Rewriterule ^/var/[^/]+/storage/.* - [L]
-           RewriteRule ^/var/cache/texttoimage/.* - [L]
-           RewriteRule ^/var/[^/]+/cache/texttoimage/.* - [L]
-           Rewriterule ^/design/[^/]+/(stylesheets|images|javascript)/.* - [L]
-           Rewriterule ^/share/icons/.* - [L]
-           Rewriterule ^/extension/[^/]+/design/[^/]+/(stylesheets|images|javascripts?)/.* - [L]
-           Rewriterule ^/packages/styles/.+/(stylesheets|images|javascript)/[^/]+/.* - [L]
-           RewriteRule ^/packages/styles/.+/thumbnail/.* - [L]
-           RewriteRule ^/favicon\.ico - [L]
-           RewriteRule ^/robots\.txt - [L]
 
-           # Uncomment the following lines when using popup style debug.
-           # RewriteRule ^/var/cache/debug\.html.* - [L]
-           # RewriteRule ^/var/[^/]+/cache/debug\.html.* - [L]
+           # *Here the rest of your eZ Publish rewrite rules should be*
 
            RewriteRule .* /index.php
        </IfModule>
@@ -534,22 +523,11 @@ all the needed mod_filter configuration directives.
 
        <IfModule mod_rewrite.c>
            RewriteEngine On
-           Rewriterule ^/var/si-blocks/.* - [L]
-           Rewriterule ^/var/storage/.* - [L]
-           Rewriterule ^/var/[^/]+/storage/.* - [L]
-           RewriteRule ^/var/cache/texttoimage/.* - [L]
-           RewriteRule ^/var/[^/]+/cache/texttoimage/.* - [L]
-           Rewriterule ^/design/[^/]+/(stylesheets|images|javascript)/.* - [L]
-           Rewriterule ^/share/icons/.* - [L]
-           Rewriterule ^/extension/[^/]+/design/[^/]+/(stylesheets|images|javascripts?)/.* - [L]
-           Rewriterule ^/packages/styles/.+/(stylesheets|images|javascript)/[^/]+/.* - [L]
-           RewriteRule ^/packages/styles/.+/thumbnail/.* - [L]
-           RewriteRule ^/favicon\.ico - [L]
-           RewriteRule ^/robots\.txt - [L]
 
-           # Uncomment the following lines when using popup style debug.
-           # RewriteRule ^/var/cache/debug\.html.* - [L]
-           # RewriteRule ^/var/[^/]+/cache/debug\.html.* - [L]
+           # Rewriterule needed by ezsi, make sure to place it among the first rules after statement above
+           Rewriterule ^/var/si-blocks/.* - [L]
+
+           # *Here the rest of your eZ Publish rewrite rules should be*
 
            RewriteRule .* /index.php
        </IfModule>
